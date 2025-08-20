@@ -31,7 +31,7 @@ namespace BlogAPI.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
             List<User> users = await _context.Users.ToListAsync();
             return users;

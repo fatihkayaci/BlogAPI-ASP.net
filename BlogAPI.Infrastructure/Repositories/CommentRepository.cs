@@ -31,19 +31,25 @@ namespace BlogAPI.Infrastructure.Repositories
             return true;
         }
 
+        public async Task<IEnumerable<Comment>> GetAllAsync()
+        {
+            List<Comment> comments = await _context.Comments.ToListAsync();
+            return comments;
+        }
+
         public async Task<Comment?> GetByIdAsync(int id)
         {
             var comment = await _context.Comments.FindAsync(id);
             return comment;
         }
 
-        public async Task<List<Comment>> GetByPostIdAsync(int postId)
+        public async Task<IEnumerable<Comment>> GetByPostIdAsync(int postId)
         {
             List<Comment> comments = await _context.Comments.Where(p => p.PostId == postId).ToListAsync();
             return comments;
         }
 
-        public async Task<List<Comment>> GetByUserIdAsync(int userId)
+        public async Task<IEnumerable<Comment>> GetByUserIdAsync(int userId)
         {
             List<Comment> comments = await _context.Comments.Where(u => u.UserId == userId).ToListAsync();
             return comments;

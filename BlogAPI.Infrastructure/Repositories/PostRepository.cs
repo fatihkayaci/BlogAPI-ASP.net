@@ -32,7 +32,7 @@ namespace BlogAPI.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<List<Post>> GetAllAsync()
+        public async Task<IEnumerable<Post>> GetAllAsync()
         {
             
             List<Post> posts = await _context.Posts.ToListAsync();
@@ -45,7 +45,7 @@ namespace BlogAPI.Infrastructure.Repositories
             return post;
         }
 
-        public async Task<List<Post>> GetByUserIdAsync(int userId)
+        public async Task<IEnumerable<Post>> GetByUserIdAsync(int userId)
         {
             List<Post> posts = await _context.Posts.Where(u => u.UserId == userId).ToListAsync();
             return posts;
