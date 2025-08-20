@@ -1,0 +1,42 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Visual Studio Code
+.vscode/
+
+# JetBrains Rider
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker files
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Database files
+*.db
+*.sqlite
+
+# Node.js (if any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/

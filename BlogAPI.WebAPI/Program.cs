@@ -6,9 +6,9 @@ using BlogAPI.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext ekle
+// DbContext ekle - Connection string'i appsettings.json'dan al
 builder.Services.AddDbContext<BlogDbContext>(options =>
-    options.UseNpgsql("Host=postgres-blog;Database=blogdb;Username=postgres;Password=123456"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repository'leri ekle
 builder.Services.AddScoped<IUserRepository, UserRepository>();
