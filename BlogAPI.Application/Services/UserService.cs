@@ -1,90 +1,47 @@
 using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.DTOs;
 using BlogAPI.Domain.Entities;
+using AutoMapper;
 
 namespace BlogAPI.Application.Services
 {
-    public class UserService : IUserService
+    public class UserService : BaseService<User, UserDto, CreateUserDto, UpdateUserDto>, IUserService
     {
         private readonly IUserRepository _userRepository;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IMapper mapper)
+            : base(userRepository, mapper)
         {
             _userRepository = userRepository;
         }
 
-        public async Task<List<UserDto>> GetAllUsersAsync()
+        public override async Task<UserDto> CreateAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
         {
-            var users = await _userRepository.GetAllAsync();
-            var userDtos = users.Select(user => new UserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            }).ToList();
-            return userDtos;
-        }
-        public async Task<UserDto?> GetUserByIdAsync(int id)
-        {
-            var user = await _userRepository.GetByIdAsync(id);
-            if (user == null) return null;
-            var userDto = new UserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            };
-            return userDto;
-        }
-
-        public async Task<UserDto> CreateUserAsync(CreateUserDto createUserDto)
-        {
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(createUserDto.Password);
-            var user = new User
-            {
-                Username = createUserDto.Username,
-                Email = createUserDto.Email,
-                PasswordHash = passwordHash,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            var createdUser = await _userRepository.CreateAsync(user);
-
-            var userDto = new UserDto
-            {
-                Id = createdUser.Id,
-                Username = createdUser.Username,
-                Email = createdUser.Email,
-                CreatedAt = createdUser.CreatedAt
-            };
+            var user = _mapper.Map<User>(dto);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            user.CreatedAt = DateTime.UtcNow;
             
-            return userDto;
+            var createdUser = await _repository.CreateAsync(user);
+            return _mapper.Map<UserDto>(createdUser);
         }
 
-        public async Task<bool> DeleteUserAsync(int id)
-        {
-            var delete = await _userRepository.DeleteAsync(id);
-            return delete;
-        }
-
-        public async Task<bool> UpdateUserAsync(int id, UpdateUserDto updateUserDto)
+        public override async Task<bool> UpdateAsync(int id, UpdateUserDto dto, CancellationToken cancellationToken = default)
         {
             var existingUser = await _userRepository.GetByIdAsync(id);
             if (existingUser == null) return false;
 
-            existingUser.Username = updateUserDto.Username ?? existingUser.Username;
-            existingUser.Email = updateUserDto.Email ?? existingUser.Email;
-            if (!string.IsNullOrEmpty(updateUserDto.Password))
-            {
-                existingUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateUserDto.Password);
-            }
-            existingUser.UpdatedAt = DateTime.UtcNow;  // Güncelleme zamanı
-            
-            var result = await _userRepository.UpdateAsync(existingUser);
-            return result;
+            if (!string.IsNullOrEmpty(dto.Username))
+                existingUser.Username = dto.Username;
+
+            if (!string.IsNullOrEmpty(dto.Email))
+                existingUser.Email = dto.Email;
+
+            if (!string.IsNullOrEmpty(dto.Password))
+                existingUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            existingUser.UpdatedAt = DateTime.UtcNow;
+
+            return await _userRepository.UpdateAsync(existingUser);
         }
-        
     }
 }

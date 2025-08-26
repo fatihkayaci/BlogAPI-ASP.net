@@ -50,7 +50,14 @@ namespace BlogAPI.Infrastructure.Repositories
             List<Post> posts = await _context.Posts.Where(u => u.UserId == userId).ToListAsync();
             return posts;
         }
-
+        
+        public async Task<IEnumerable<Post>> SearchAsync(string searchTerm)
+        {
+            return await _context.Posts
+                .Where(p => p.Title.Contains(searchTerm) || p.Content.Contains(searchTerm))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
         public async Task<bool> UpdateAsync(Post post)
         {
             _context.Posts.Update(post);
