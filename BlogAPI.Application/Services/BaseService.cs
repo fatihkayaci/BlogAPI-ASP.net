@@ -1,5 +1,6 @@
 using BlogAPI.Application.Interfaces;
 using AutoMapper;
+using BlogAPI.Application.Exceptions;
 namespace BlogAPI.Application.Services
 {
     public abstract class BaseService<TEntity, TDto, TCreateDto, TUpdateDto> : IGenericService<TDto, TCreateDto, TUpdateDto>
@@ -29,10 +30,12 @@ namespace BlogAPI.Application.Services
             return _mapper.Map<IEnumerable<TDto>>(entities);
         }
 
-        public virtual async Task<TDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public virtual async Task<TDto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var entity = await _repository.GetByIdAsync(id);
-            return entity == null ? null : _mapper.Map<TDto>(entity);
+            if (entity == null)
+                throw new NotFoundException(typeof(TEntity).Name, id);
+            return _mapper.Map<TDto>(entity);
         }
         public virtual async Task<TDto> CreateAsync(TCreateDto dto, CancellationToken cancellationToken = default)
         {

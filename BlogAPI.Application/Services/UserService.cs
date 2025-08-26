@@ -2,6 +2,7 @@ using BlogAPI.Application.Interfaces;
 using BlogAPI.Application.DTOs;
 using BlogAPI.Domain.Entities;
 using AutoMapper;
+using BlogAPI.Application.Exceptions;
 
 namespace BlogAPI.Application.Services
 {
@@ -17,6 +18,10 @@ namespace BlogAPI.Application.Services
 
         public override async Task<UserDto> CreateAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
         {
+            var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+            if (existingUser != null)
+                throw new ValidationException("Email address is already in use");
+                
             var user = _mapper.Map<User>(dto);
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             user.CreatedAt = DateTime.UtcNow;
@@ -28,7 +33,8 @@ namespace BlogAPI.Application.Services
         public override async Task<bool> UpdateAsync(int id, UpdateUserDto dto, CancellationToken cancellationToken = default)
         {
             var existingUser = await _userRepository.GetByIdAsync(id);
-            if (existingUser == null) return false;
+            if (existingUser == null) 
+                throw new NotFoundException("User", id);
 
             if (!string.IsNullOrEmpty(dto.Username))
                 existingUser.Username = dto.Username;
