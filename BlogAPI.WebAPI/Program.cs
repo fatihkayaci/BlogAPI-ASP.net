@@ -3,7 +3,8 @@ using BlogAPI.Application.Interfaces;
 using BlogAPI.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using BlogAPI.Application.Services;
-using BlogAPI.Application.Mapping;
+using FluentValidation;
+using BlogAPI.Application.Validators.UserValidators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAutoMapper(typeof(UserProfile), typeof(PostProfile), typeof(CommentProfile));
+//auto mapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// FluentValidation'ı register et
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
+
 var app = builder.Build();
 
 // Configure pipeline
