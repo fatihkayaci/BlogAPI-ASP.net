@@ -8,8 +8,6 @@ namespace BlogAPI.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
-            // Comment configuration
-        
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Content).IsRequired().HasMaxLength(500);
             
@@ -22,6 +20,12 @@ namespace BlogAPI.Infrastructure.Data.Configurations
             builder.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(c => c.UserId);
+
+            // INDEXES - YENİ KISIM
+            builder.HasIndex(c => c.PostId);
+            builder.HasIndex(c => c.UserId);
+            builder.HasIndex(c => c.CreatedAt);
+            builder.HasIndex(c => new { c.PostId, c.CreatedAt });
         }
     }
 }
