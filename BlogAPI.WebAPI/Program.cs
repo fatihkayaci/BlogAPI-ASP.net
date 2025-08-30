@@ -34,6 +34,14 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
 
 var app = builder.Build();
+// -------------- for sql test --------------
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BlogDbContext>();
+    var query = context.Posts.Where(p => p.UserId == 5);
+    Console.WriteLine("SQL: " + query.ToQueryString());
+}
+// -------------- for sql test --------------
 
 // Configure pipeline
 if (app.Environment.IsDevelopment())
