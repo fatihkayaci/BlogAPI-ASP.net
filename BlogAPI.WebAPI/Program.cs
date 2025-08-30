@@ -27,6 +27,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+// burası json gönderilecek veriyi case duyarsızlığı yapıyor
+/* 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; // ❌ Sıkı mod
+});
+*/
 //auto mapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
