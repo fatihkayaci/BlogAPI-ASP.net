@@ -1,5 +1,6 @@
 using System.Reflection;
 using BlogAPI.Domain.Entities;
+using BlogAPI.Infrastructure.Data.Seeders;
 using Microsoft.EntityFrameworkCore;
 namespace BlogAPI.Infrastructure.Data
 {
@@ -14,6 +15,7 @@ namespace BlogAPI.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            BlogSeeder.SeedAllData(modelBuilder);
         }
     }
 }
