@@ -8,10 +8,26 @@ using BlogAPI.Application.Validators.UserValidators;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext ekle - Connection string'i appsettings.json'dan al
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-
+// Railway DATABASE_URL'yi PostgreSQL connection string'e çevir
+string connectionString;
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"DATABASE_URL: {databaseUrl ?? "NULL/BOŞ"}");
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    // Railway DATABASE_URL format: postgresql://user:password@host:port/database
+    // .NET format: Host=host;Port=port;Database=database;Username=user;Password=password
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+else
+{
+    // Local development için appsettings.json'dan al
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+}
+Console.WriteLine($"connectionString: {connectionString ?? "NULL/BOŞ"}");
+// DbContext ekle - Dönüştürülmüş connection string'i kullan
 builder.Services.AddDbContext<BlogDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -20,7 +36,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
-//serviceler ekle
+// Serviceleri ekle
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
@@ -30,29 +46,32 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-// burası json gönderilecek veriyi case duyarsızlığı yapıyor
+// JSON gönderilecek veriyi case duyarsızlığı yapıyor
 /* 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; // ❌ Sıkı mod
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; // ❌ Sıkı mod
 });
 */
-//auto mapper
+
+// AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // FluentValidation'ı register et
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
 
 var app = builder.Build();
-// -------------- for sql test --------------
+
+// SQL test kodunu kaldırdık - Railway'de hata veriyordu
+// Railway'de database hazır olana kadar bu kodu çalıştırmıyoruz
+/*
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BlogDbContext>();
     var query = context.Posts.Where(p => p.UserId == 5);
     Console.WriteLine("SQL: " + query.ToQueryString());
 }
-// -------------- for sql test --------------
+*/
 
 // Configure pipeline
 if (app.Environment.IsDevelopment())
@@ -61,7 +80,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Production'da da Swagger'ı aç (Railway için)
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// HTTPS redirection'ı kaldırdık - Railway'de sorun çıkarıyor
 // app.UseHttpsRedirection();
+
 app.MapControllers();
 
 app.Run();
