@@ -77,7 +77,7 @@ A **RESTful Blog API** built with **.NET 9** following **Clean Architecture** pr
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/fatihkayaci/blog-api.git
+   git clone https://github.com/fatihkayaci/BlogAPI-ASP.net
    cd blog-api
    ```
 
