@@ -9,8 +9,11 @@ using BlogAPI.Application.Validators.UserValidators;
 var builder = WebApplication.CreateBuilder(args);
 
 // DbContext ekle - Connection string'i appsettings.json'dan al
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<BlogDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // Repository'leri ekle
 builder.Services.AddScoped<IUserRepository, UserRepository>();
