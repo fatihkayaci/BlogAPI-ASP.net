@@ -62,6 +62,19 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BlogDbContext>();
+    try
+    {
+        context.Database.Migrate(); // Otomatik migration
+        Console.WriteLine("Database migration başarılı!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration hatası: {ex.Message}");
+    }
+}
 // SQL test kodunu kaldırdık - Railway'de hata veriyordu
 // Railway'de database hazır olana kadar bu kodu çalıştırmıyoruz
 /*
